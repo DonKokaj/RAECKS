@@ -10,13 +10,6 @@
     .chatbot-btn { padding: 8px 16px; font-size: 14px; border: none; background-color: #007bff; color: #fff; border-radius: 4px; cursor: pointer; }
     .chatbot-btn:hover { background-color: #0056b3; }
     .content { flex: 1; padding: 20px; }
-
-    /* Prevent initial flicker: keep Voiceflow host hidden at first paint */
-    #voiceflow-chat {
-      visibility: hidden !important;
-      opacity: 0 !important;
-      pointer-events: none !important;
-    }
   </style>
 </head>
 <body>
@@ -29,71 +22,103 @@
     <p>This is a simple HTML page for testing purposes.</p>
   </div>
 
-  <!-- Voiceflow widget snippet (unchanged) -->
-  <script type="text/javascript">
-    (function(d, t) {
-      var v = d.createElement(t), s = d.getElementsByTagName(t)[0];
-      v.onload = function() {
+  <script>
+    // Helper: find element inside #voiceflow-chat shadow root
+    function findInVFShadow(selector) {
+      const host = document.querySelector('#voiceflow-chat');
+      if (!host || !host.shadowRoot) return null;
+      const search = (root) => {
+        const el = root.querySelector(selector);
+        if (el) return el;
+        for (const n of root.querySelectorAll('*')) {
+          if (n.shadowRoot) {
+            const found = search(n.shadowRoot);
+            if (found) return found;
+          }
+        }
+        return null;
+      };
+      return search(host.shadowRoot);
+    }
+
+    // Keep launcher hidden even if VF re-renders
+    function keepLauncherHidden() {
+      const host = document.querySelector('#voiceflow-chat');
+      if (host && host.shadowRoot) {
+        const hide = () => {
+          const launcher = findInVFShadow('.vfrc-launcher');
+          if (launcher) {
+            launcher.style.display = 'none';
+            launcher.style.visibility = 'hidden';
+            launcher.style.opacity = '0';
+            launcher.style.pointerEvents = 'none';
+          }
+        };
+        hide();
+        new MutationObserver(hide).observe(host.shadowRoot, { childList: true, subtree: true });
+      }
+    }
+
+    async function loadAndOpenVF() {
+      // Load bundle once
+      if (!window.__vfBundleLoading && !window.voiceflow) {
+        window.__vfBundleLoading = new Promise((resolve) => {
+          const v = document.createElement('script');
+          v.src = "https://cdn.voiceflow.com/widget-next/bundle.mjs";
+          v.type = "text/javascript";
+          v.onload = resolve;
+          document.head.appendChild(v);
+        });
+      }
+      if (window.__vfBundleLoading) {
+        await window.__vfBundleLoading;
+      }
+
+      // Initialize the chat (only once)
+      if (!window.__vfLoaded) {
         window.voiceflow.chat.load({
           verify: { projectID: '68836e528962bd670e7bff9b' },
           url: 'https://general-runtime.voiceflow.com',
           versionID: 'production',
           voice: { url: 'https://runtime-api.voiceflow.com' }
         });
-      };
-      v.src = "https://cdn.voiceflow.com/widget-next/bundle.mjs";
-      v.type = "text/javascript";
-      s.parentNode.insertBefore(v, s);
-    })(document, 'script');
-  </script>
-
-  <!-- Control visibility + wait for API before opening -->
-  <script>
-    function showVFHost() {
-      const host = document.getElementById('voiceflow-chat');
-      if (host) {
-        host.style.visibility = 'visible';
-        host.style.opacity = '1';
-        host.style.pointerEvents = 'auto';
+        window.__vfLoaded = true;
       }
-    }
-    function hideVFHost() {
-      const host = document.getElementById('voiceflow-chat');
-      if (host) {
-        host.style.visibility = 'hidden';
-        host.style.opacity = '0';
-        host.style.pointerEvents = 'none';
-      }
-    }
-    function waitForVF(fn, timeout = 1500) {
-      const start = performance.now();
-      const id = setInterval(() => {
-        const ready = !!(window.voiceflow && window.voiceflow.chat && typeof window.voiceflow.chat.open === 'function');
-        if (ready) {
-          clearInterval(id);
-          fn();
-        } else if (performance.now() - start > timeout) {
-          clearInterval(id);
-          // give up silently
-        }
-      }, 100);
-    }
 
-    // Click handler: reveal host, then open when API is ready
-    document.getElementById('openChatbot').addEventListener('click', () => {
-      showVFHost();
-      waitForVF(() => {
-        if (typeof window.voiceflow.chat.show === 'function') window.voiceflow.chat.show();
-        window.voiceflow.chat.open();
+      // Wait until API is ready
+      await new Promise((res, rej) => {
+        const start = performance.now();
+        const id = setInterval(() => {
+          if (window.voiceflow?.chat?.open) {
+            clearInterval(id);
+            res();
+          } else if (performance.now() - start > 15000) {
+            clearInterval(id);
+            rej(new Error('Voiceflow API not ready'));
+          }
+        }, 100);
       });
-    });
 
-    // When chat is closed/minimized, hide host again so nothing remains visible
-    window.addEventListener('message', (event) => {
-      try {
-        const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
-        if (data?.type === 'voiceflow:close') hideVFHost();
-      } catch {}
+      // Hide launcher bubble via shadow DOM (so only the chat window is visible)
+      keepLauncherHidden();
+
+      // Open chat window
+      if (typeof window.voiceflow.chat.show === 'function') window.voiceflow.chat.show();
+      window.voiceflow.chat.open();
+
+      // When user closes/minimizes, keep the launcher hidden
+      window.addEventListener('message', (event) => {
+        try {
+          const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+          if (data?.type === 'voiceflow:close') {
+            keepLauncherHidden();
+          }
+        } catch {}
+      }, { once: true });
+    }
+
+    document.getElementById('openChatbot').addEventListener('click', () => {
+      loadAndOpenVF().catch(console.error);
     });
   </script>
 </body>
