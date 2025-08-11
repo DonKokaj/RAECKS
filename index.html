@@ -1,12 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Raecks</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Raecks</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    .top-buttons {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* AI Chatbot text button */
+    .chatbot-btn {
+      padding: 5px 10px;
+      font-size: 14px;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .chatbot-btn:hover {
+      background-color: #0056b3;
+    }
+
+    /* Circular icon button */
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      background-color: #2f6458;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+      border: none;
+    }
+
+    .icon-btn:hover {
+      background-color: #264f46;
+    }
+
+    .icon-btn svg {
+      width: 20px;
+      height: 20px;
+      fill: white;
+    }
+  </style>
 </head>
 <body>
-    <h1>Welcome to Test Raecks</h1>
-    <p>This is a simple HTML page for testing purposes.</p>
+  <div class="top-buttons">
+    <button class="chatbot-btn">AI Chatbot</button>
+    <button class="icon-btn" title="Message">
+      <!-- Envelope icon (SVG) -->
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 
+                 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 
+                 2-2zm0 2v.01L12 13 20 6.01V6H4zm0 
+                 12h16V8l-8 7-8-7v10z"/>
+      </svg>
+    </button>
+  </div>
+
+  <h1>Welcome to Test Raecks</h1>
+  <p>This is a simple HTML page for testing purposes.</p>
 </body>
 </html>
