@@ -53,22 +53,26 @@
       name: 'click-envelope-ext',
       type: 'effect',
       match: ({ trace }) => {
-        // Robustly detect custom action
         const t = trace?.type;
         const n = trace?.name ?? trace?.payload?.name ?? trace?.payload?.action;
         const isCustom = t === 'custom_action' || t === 'action' || t === 'custom';
         const matched = isCustom && typeof n === 'string' && n.toLowerCase() === 'click-envelope';
-        if (isCustom) {
-          console.log('[VF] custom action trace:', { type: t, name: n, full: trace, matched });
-        }
+        console.log('[VF EXT] match() called', { type: t, name: n, isCustom, matched, fullTrace: trace });
         return matched;
       },
       effect: () => {
+        console.log('[VF EXT] effect() fired — trying to click the envelope button');
         const btn = document.getElementById('envelopeBtn') || document.querySelector('.icon-btn');
-        console.log('[VF] click-envelope EXT effect fired. Button found?', !!btn);
-        if (btn) btn.click();
+        if (btn) {
+          console.log('[VF EXT] Envelope button found — clicking now');
+          btn.click();
+        } else {
+          console.warn('[VF EXT] Envelope button NOT found');
+        }
       }
     };
+
+    console.log('[VF EXT] clickEnvelopeExtension object created');
   </script>
 
   <!-- Voiceflow widget -->
@@ -76,6 +80,7 @@
     (function(d, t) {
       var v = d.createElement(t), s = d.getElementsByTagName(t)[0];
       v.onload = function() {
+        console.log('[VF EXT] Widget script loaded — registering extension');
         window.voiceflow.chat.load({
           verify: { projectID: '68836e528962bd670e7bff9b' },
           url: 'https://general-runtime.voiceflow.com',
@@ -83,6 +88,7 @@
           assistant: { extensions: [clickEnvelopeExtension] },
           voice: { url: 'https://runtime-api.voiceflow.com' }
         });
+        console.log('[VF EXT] Extension registered with Voiceflow widget');
       };
       v.src = "https://cdn.voiceflow.com/widget-next/bundle.mjs";
       v.type = "text/javascript";
@@ -93,7 +99,10 @@
   <!-- Open chat on AI Chatbot button click (for manual test) -->
   <script>
     document.getElementById('openChatbot').addEventListener('click', () => {
-      if (window.voiceflow?.chat?.open) window.voiceflow.chat.open();
+      if (window.voiceflow?.chat?.open) {
+        console.log('[VF EXT] AI Chatbot button clicked — opening chat');
+        window.voiceflow.chat.open();
+      }
     });
   </script>
 </body>
