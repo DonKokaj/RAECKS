@@ -10,6 +10,27 @@
     .chatbot-btn { padding: 8px 16px; font-size: 14px; border: none; background-color: #007bff; color: #fff; border-radius: 4px; cursor: pointer; }
     .chatbot-btn:hover { background-color: #0056b3; }
     .content { flex: 1; padding: 20px; }
+
+    /* Floating envelope button */
+    .icon-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      background-color: #2f6458;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      border: none;
+    }
+    .icon-btn svg {
+      width: 22px;
+      height: 22px;
+      fill: white;
+    }
   </style>
 </head>
 <body>
@@ -21,6 +42,16 @@
     <h1>Welcome to Test Raecks</h1>
     <p>This is a simple HTML page for testing purposes.</p>
   </div>
+
+  <!-- Floating envelope button (no click) -->
+  <button class="icon-btn" title="Message">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 
+               2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 
+               2-2zm0 2v.01L12 13 20 6.01V6H4zm0 
+               12h16V8l-8 7-8-7v10z"/>
+    </svg>
+  </button>
 
   <!-- Voiceflow widget -->
   <script type="text/javascript">
@@ -40,7 +71,7 @@
     })(document, 'script');
   </script>
 
-  <!-- Open chat on button click -->
+  <!-- Open chat on AI Chatbot button click -->
   <script>
     document.getElementById('openChatbot').addEventListener('click', () => {
       if (window.voiceflow?.chat?.open) {
