@@ -11,12 +11,11 @@
     .chatbot-btn:hover { background-color: #0056b3; }
     .content { flex: 1; padding: 20px; }
 
-    /* 🔒 Prevent flicker on first load: keep the VF host hidden */
+    /* Prevent initial flicker: keep Voiceflow host hidden at first paint */
     #voiceflow-chat {
       visibility: hidden !important;
       opacity: 0 !important;
       pointer-events: none !important;
-      /* keep layout unaffected; VF positions it fixed anyway */
     }
   </style>
 </head>
@@ -48,37 +47,52 @@
     })(document, 'script');
   </script>
 
-  <!-- Control visibility + open/close behavior -->
+  <!-- Control visibility + wait for API before opening -->
   <script>
-    const showVFHost = () => {
+    function showVFHost() {
       const host = document.getElementById('voiceflow-chat');
       if (host) {
         host.style.visibility = 'visible';
         host.style.opacity = '1';
         host.style.pointerEvents = 'auto';
       }
-    };
-    const hideVFHost = () => {
+    }
+    function hideVFHost() {
       const host = document.getElementById('voiceflow-chat');
       if (host) {
         host.style.visibility = 'hidden';
         host.style.opacity = '0';
         host.style.pointerEvents = 'none';
       }
-    };
+    }
+    function waitForVF(fn, timeout = 15000) {
+      const start = performance.now();
+      const id = setInterval(() => {
+        const ready = !!(window.voiceflow && window.voiceflow.chat && typeof window.voiceflow.chat.open === 'function');
+        if (ready) {
+          clearInterval(id);
+          fn();
+        } else if (performance.now() - start > timeout) {
+          clearInterval(id);
+          // give up silently
+        }
+      }, 100);
+    }
 
-    // Open from our button without ever showing the launcher bubble
+    // Click handler: reveal host, then open when API is ready
     document.getElementById('openChatbot').addEventListener('click', () => {
       showVFHost();
-      // Official API: open the chat window
-      if (window.voiceflow?.chat?.open) window.voiceflow.chat.open();  /* :contentReference[oaicite:0]{index=0} */
+      waitForVF(() => {
+        if (typeof window.voiceflow.chat.show === 'function') window.voiceflow.chat.show();
+        window.voiceflow.chat.open();
+      });
     });
 
-    // When user minimizes/closes, hide the host again so nothing is visible
+    // When chat is closed/minimized, hide host again so nothing remains visible
     window.addEventListener('message', (event) => {
       try {
         const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
-        if (data?.type === 'voiceflow:close') hideVFHost(); /* :contentReference[oaicite:1]{index=1} */
+        if (data?.type === 'voiceflow:close') hideVFHost();
       } catch {}
     });
   </script>
