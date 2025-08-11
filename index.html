@@ -22,22 +22,22 @@
     <p>This is a simple HTML page for testing purposes.</p>
   </div>
 
-  <!-- Voiceflow widget snippet (unchanged) -->
   <script type="text/javascript">
     (function(d, t) {
       var v = d.createElement(t), s = d.getElementsByTagName(t)[0];
 
-      // Utility: run fn once API is really ready
-      function onVFReady(fn, timeout = 5000) {
+      function waitForLauncherAndHide(timeout = 15000) {
         const start = performance.now();
-        const tick = () => {
-          const api = window.voiceflow && window.voiceflow.chat;
-          const ready = !!(api && typeof api.hide === 'function' && typeof api.open === 'function');
-          if (ready) return void fn(api);
-          if (performance.now() - start > timeout) return; // give up quietly
-          requestAnimationFrame(tick);
-        };
-        requestAnimationFrame(tick);
+        const id = setInterval(() => {
+          const apiReady = window.voiceflow?.chat && typeof window.voiceflow.chat.hide === 'function';
+          const launcherExists = document.querySelector('#voiceflow-chat');
+          if (apiReady && launcherExists) {
+            clearInterval(id);
+            try { window.voiceflow.chat.hide(); } catch(_) {}
+          } else if (performance.now() - start > timeout) {
+            clearInterval(id);
+          }
+        }, 100);
       }
 
       v.onload = function() {
@@ -47,11 +47,7 @@
           versionID: 'production',
           voice: { url: 'https://runtime-api.voiceflow.com' }
         });
-
-        // Hide the launcher bubble ONLY after the API is fully ready
-        onVFReady((api) => {
-          try { api.hide(); } catch(_) {}
-        });
+        waitForLauncherAndHide();
       };
 
       v.src = "https://cdn.voiceflow.com/widget-next/bundle.mjs";
@@ -60,28 +56,24 @@
     })(document, 'script');
   </script>
 
-  <!-- Open the chat window from our button; keep bubble hidden on close -->
   <script>
-    // Open on click (works whether user clicks early or late)
     document.getElementById('openChatbot').addEventListener('click', () => {
       const tryOpen = () => {
-        const api = window.voiceflow && window.voiceflow.chat;
+        const api = window.voiceflow?.chat;
         if (!api) { setTimeout(tryOpen, 100); return; }
-        if (typeof api.show === 'function') api.show(); // ensure window is visible
+        if (typeof api.show === 'function') api.show();
         if (typeof api.open === 'function') api.open();
       };
       tryOpen();
     });
 
-    // Re-hide the launcher if user closes/minimizes the chat
     window.addEventListener('message', (event) => {
-      let data = event.data;
-      if (typeof data === 'string') {
-        try { data = JSON.parse(data); } catch { /* ignore */ }
-      }
-      if (data && data.type === 'voiceflow:close' && window.voiceflow?.chat?.hide) {
-        window.voiceflow.chat.hide();
-      }
+      try {
+        const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+        if (data?.type === 'voiceflow:close' && window.voiceflow?.chat?.hide) {
+          window.voiceflow.chat.hide();
+        }
+      } catch {}
     });
   </script>
 </body>
