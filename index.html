@@ -7,18 +7,24 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 20px;
-    }
-
-    .top-buttons {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
       display: flex;
-      align-items: center;
-      gap: 10px;
+      flex-direction: column;
     }
 
-    /* AI Chatbot text button */
+    /* Center AI Chatbot button at the top */
+    .header {
+      display: flex;
+      justify-content: center;
+      padding: 15px;
+      background-color: #f5f5f5;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
     .chatbot-btn {
-      padding: 5px 10px;
+      padding: 8px 16px;
       font-size: 14px;
       border: none;
       background-color: #007bff;
@@ -31,10 +37,13 @@
       background-color: #0056b3;
     }
 
-    /* Circular icon button */
+    /* Floating green icon button */
     .icon-btn {
-      width: 40px;
-      height: 40px;
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
       background-color: #2f6458;
       border-radius: 50%;
       display: flex;
@@ -50,27 +59,36 @@
     }
 
     .icon-btn svg {
-      width: 20px;
-      height: 20px;
+      width: 22px;
+      height: 22px;
       fill: white;
+    }
+
+    /* Page content */
+    .content {
+      flex: 1;
+      padding: 20px;
     }
   </style>
 </head>
 <body>
-  <div class="top-buttons">
+  <div class="header">
     <button class="chatbot-btn">AI Chatbot</button>
-    <button class="icon-btn" title="Message">
-      <!-- Envelope icon (SVG) -->
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 
-                 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 
-                 2-2zm0 2v.01L12 13 20 6.01V6H4zm0 
-                 12h16V8l-8 7-8-7v10z"/>
-      </svg>
-    </button>
   </div>
 
-  <h1>Welcome to Test Raecks</h1>
-  <p>This is a simple HTML page for testing purposes.</p>
+  <div class="content">
+    <h1>Welcome to Test Raecks</h1>
+    <p>This is a simple HTML page for testing purposes.</p>
+  </div>
+
+  <!-- Floating envelope button -->
+  <button class="icon-btn" title="Message">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 
+               2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 
+               2-2zm0 2v.01L12 13 20 6.01V6H4zm0 
+               12h16V8l-8 7-8-7v10z"/>
+    </svg>
+  </button>
 </body>
 </html>
