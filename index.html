@@ -28,7 +28,7 @@
       var v = d.createElement(t), s = d.getElementsByTagName(t)[0];
 
       // Utility: run fn once API is really ready
-      function onVFReady(fn, timeout = 1500) {
+      function onVFReady(fn, timeout = 5000) {
         const start = performance.now();
         const tick = () => {
           const api = window.voiceflow && window.voiceflow.chat;
