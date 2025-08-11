@@ -34,11 +34,11 @@
           voice: { url: 'https://runtime-api.voiceflow.com' }
         });
 
-        // Wait until API is ready, then hide the launcher bubble
-        const waitReady = setInterval(() => {
-          if (window.voiceflow && window.voiceflow.chat && typeof window.voiceflow.chat.hide === 'function') {
-            clearInterval(waitReady);
-            window.voiceflow.chat.hide(); // hide default launcher bubble
+        // After the API becomes available, hide the widget (launcher bubble)
+        const wait = setInterval(() => {
+          if (window.voiceflow?.chat?.hide) {
+            clearInterval(wait);
+            window.voiceflow.chat.hide();   // hides launcher bubble
           }
         }, 100);
       };
@@ -48,24 +48,25 @@
     })(document, 'script');
   </script>
 
-  <!-- Open the chat when "AI Chatbot" is clicked; keep launcher hidden after close -->
+  <!-- Open the chat window from our button -->
   <script>
-    // open the chat window
-    document.getElementById('openChatbot').addEventListener('click', function () {
-      if (window.voiceflow?.chat?.open) {
-        window.voiceflow.chat.open();
+    document.getElementById('openChatbot').addEventListener('click', () => {
+      if (window.voiceflow?.chat) {
+        // Re-show UI and open the chat window (so only the window is visible)
+        if (typeof window.voiceflow.chat.show === 'function') window.voiceflow.chat.show();
+        if (typeof window.voiceflow.chat.open === 'function') window.voiceflow.chat.open();
       }
     });
 
-    // if user closes/minimizes, re-hide the launcher so it never reappears
+    // Optional: when user closes the chat, hide the launcher again
     window.addEventListener('message', (event) => {
       try {
         const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
         if (data?.type === 'voiceflow:close' && window.voiceflow?.chat?.hide) {
-          window.voiceflow.chat.hide();
+          window.voiceflow.chat.hide();   // keep the bubble hidden after closing
         }
-      } catch (_) { /* ignore non-JSON messages */ }
-    }, false);
+      } catch {}
+    });
   </script>
 </body>
 </html>
