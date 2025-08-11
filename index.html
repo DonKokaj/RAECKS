@@ -64,11 +64,6 @@
       fill: white;
     }
 
-    /* Hide the default Voiceflow launcher bubble */
-    .vf-chat-launcher {
-      display: none !important;
-    }
-
     /* Page content */
     .content {
       flex: 1;
@@ -114,9 +109,9 @@
     })(document, 'script');
   </script>
 
-  <!-- Script to trigger hidden widget when AI Chatbot is clicked -->
+  <!-- Script to hide widget and trigger it on button click -->
   <script>
-    function waitFor(selector, timeout = 1500) {
+    function waitFor(selector, timeout = 15000) {
       return new Promise((resolve, reject) => {
         const start = performance.now();
         const id = setInterval(() => {
@@ -130,14 +125,20 @@
     (async () => {
       try {
         const launcher = await waitFor('.vf-chat-launcher');
+
+        // ✅ Force-hide widget bubble
         launcher.style.display = 'none';
+        launcher.style.visibility = 'hidden';
+        launcher.style.opacity = '0';
         launcher.style.pointerEvents = 'none';
 
+        // Trigger chatbot on "AI Chatbot" button click
         const openBtn = document.getElementById('openChatbot');
         if (openBtn) {
           openBtn.addEventListener('click', () => launcher.click());
         }
       } catch {
+        // Fallback to API if available
         const openBtn = document.getElementById('openChatbot');
         if (openBtn) {
           openBtn.addEventListener('click', () => {
