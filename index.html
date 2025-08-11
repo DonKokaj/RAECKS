@@ -65,7 +65,7 @@
         host.style.pointerEvents = 'none';
       }
     }
-    function waitForVF(fn, timeout = 15000) {
+    function waitForVF(fn, timeout = 1500) {
       const start = performance.now();
       const id = setInterval(() => {
         const ready = !!(window.voiceflow && window.voiceflow.chat && typeof window.voiceflow.chat.open === 'function');
