@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Test Raecks</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; }
+    .header { display: flex; justify-content: center; padding: 15px; background-color: #f5f5f5; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .chatbot-btn { padding: 8px 16px; font-size: 14px; border: none; background-color: #007bff; color: #fff; border-radius: 4px; cursor: pointer; }
+    .chatbot-btn:hover { background-color: #0056b3; }
+    .content { flex: 1; padding: 20px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <button class="chatbot-btn" id="openChatbot">AI Chatbot</button>
+  </div>
+
+  <div class="content">
+    <h1>Welcome to Test Raecks</h1>
+    <p>This is a simple HTML page for testing purposes.</p>
+  </div>
+
+  <!-- Voiceflow widget -->
+  <script type="text/javascript">
+    (function(d, t) {
+      var v = d.createElement(t), s = d.getElementsByTagName(t)[0];
+      v.onload = function() {
+        window.voiceflow.chat.load({
+          verify: { projectID: '68836e528962bd670e7bff9b' },
+          url: 'https://general-runtime.voiceflow.com',
+          versionID: 'production',
+          voice: { url: 'https://runtime-api.voiceflow.com' }
+        });
+      };
+      v.src = "https://cdn.voiceflow.com/widget-next/bundle.mjs";
+      v.type = "text/javascript";
+      s.parentNode.insertBefore(v, s);
+    })(document, 'script');
+  </script>
+
+  <!-- Open chat on button click -->
+  <script>
+    document.getElementById('openChatbot').addEventListener('click', () => {
+      if (window.voiceflow?.chat?.open) {
+        window.voiceflow.chat.open();
+      }
+    });
+  </script>
+</body>
+</html>
