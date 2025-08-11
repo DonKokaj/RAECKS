@@ -26,7 +26,7 @@
     (function(d, t) {
       var v = d.createElement(t), s = d.getElementsByTagName(t)[0];
 
-      function waitForLauncherAndHide(timeout = 15000) {
+      function waitForLauncherAndHide(timeout = 1500) {
         const start = performance.now();
         const id = setInterval(() => {
           const apiReady = window.voiceflow?.chat && typeof window.voiceflow.chat.hide === 'function';
