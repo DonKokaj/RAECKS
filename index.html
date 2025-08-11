@@ -27,11 +27,7 @@
       border: none;
       cursor: pointer;
     }
-    .icon-btn svg {
-      width: 22px;
-      height: 22px;
-      fill: white;
-    }
+    .icon-btn svg { width: 22px; height: 22px; fill: white; }
   </style>
 </head>
 <body>
@@ -45,24 +41,31 @@
   </div>
 
   <!-- Floating envelope button -->
-  <button class="icon-btn" title="Message">
+  <button class="icon-btn" id="envelopeBtn" title="Message">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 
-               2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 
-               2-2zm0 2v.01L12 13 20 6.01V6H4zm0 
-               12h16V8l-8 7-8-7v10z"/>
+      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm0 2v.01L12 13 20 6.01V6H4zm0 12h16V8l-8 7-8-7v10z"/>
     </svg>
   </button>
 
-  <!-- Extension: trigger envelope click when the VF step "CLICK_ENVELOPE" runs -->
+  <!-- Extension: trigger when Custom Action named "click-envelope" runs -->
   <script>
     const clickEnvelopeExtension = {
-      name: 'click-envelope',
+      name: 'click-envelope-ext',
       type: 'effect',
-      // This fires when a Custom Action step named CLICK_ENVELOPE is reached
-      match: ({ trace }) => trace?.type === 'CLICK_ENVELOPE',
+      match: ({ trace }) => {
+        // Robustly detect custom action
+        const t = trace?.type;
+        const n = trace?.name ?? trace?.payload?.name ?? trace?.payload?.action;
+        const isCustom = t === 'custom_action' || t === 'action' || t === 'custom';
+        const matched = isCustom && typeof n === 'string' && n.toLowerCase() === 'click-envelope';
+        if (isCustom) {
+          console.log('[VF] custom action trace:', { type: t, name: n, full: trace, matched });
+        }
+        return matched;
+      },
       effect: () => {
-        const btn = document.querySelector('.icon-btn');
+        const btn = document.getElementById('envelopeBtn') || document.querySelector('.icon-btn');
+        console.log('[VF] click-envelope EXT effect fired. Button found?', !!btn);
         if (btn) btn.click();
       }
     };
@@ -87,12 +90,10 @@
     })(document, 'script');
   </script>
 
-  <!-- Open chat on AI Chatbot button click -->
+  <!-- Open chat on AI Chatbot button click (for manual test) -->
   <script>
     document.getElementById('openChatbot').addEventListener('click', () => {
-      if (window.voiceflow?.chat?.open) {
-        window.voiceflow.chat.open();
-      }
+      if (window.voiceflow?.chat?.open) window.voiceflow.chat.open();
     });
   </script>
 </body>
