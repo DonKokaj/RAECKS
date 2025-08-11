@@ -64,6 +64,11 @@
       fill: white;
     }
 
+    /* Hide Voiceflow default launcher */
+    .vf-chat-launcher {
+      display: none !important;
+    }
+
     /* Page content */
     .content {
       flex: 1;
@@ -73,7 +78,7 @@
 </head>
 <body>
   <div class="header">
-    <button class="chatbot-btn">AI Chatbot</button>
+    <button class="chatbot-btn" id="openChatbot">AI Chatbot</button>
   </div>
 
   <div class="content">
@@ -99,12 +104,20 @@
             verify: { projectID: '68836e528962bd670e7bff9b' },
             url: 'https://general-runtime.voiceflow.com',
             versionID: 'production',
-            voice: {
-              url: "https://runtime-api.voiceflow.com"
+            voice: { url: "https://runtime-api.voiceflow.com" }
+          });
+
+          // Open chatbot when button clicked
+          document.getElementById('openChatbot').addEventListener('click', function() {
+            const launcher = document.querySelector('.vf-chat-launcher');
+            if (launcher) {
+              launcher.click(); // Simulate a click on the hidden launcher
             }
           });
         }
-        v.src = "https://cdn.voiceflow.com/widget-next/bundle.mjs"; v.type = "text/javascript"; s.parentNode.insertBefore(v, s);
+        v.src = "https://cdn.voiceflow.com/widget-next/bundle.mjs"; 
+        v.type = "text/javascript"; 
+        s.parentNode.insertBefore(v, s);
     })(document, 'script');
   </script>
 </body>
