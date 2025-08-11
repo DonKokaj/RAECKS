@@ -45,7 +45,7 @@
   </div>
 
   <!-- Floating envelope button -->
-  <button class="icon-btn" id="envelopeBtn" title="Message">
+  <button class="icon-btn" title="Message">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
       <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 
                2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 
@@ -54,21 +54,22 @@
     </svg>
   </button>
 
-  <!-- Extension + Widget load -->
+  <!-- Extension: trigger envelope click when the VF step "CLICK_ENVELOPE" runs -->
   <script>
-    // 1) Define your effect extension
     const clickEnvelopeExtension = {
       name: 'click-envelope',
       type: 'effect',
-      // Custom Action name becomes the trace.type (see docs)
-      match: ({ trace }) => trace?.type === 'ENVELOPE_CLICK',
+      // This fires when a Custom Action step named CLICK_ENVELOPE is reached
+      match: ({ trace }) => trace?.type === 'CLICK_ENVELOPE',
       effect: () => {
-        // simulate clicking the envelope button
-        document.getElementById('envelopeBtn')?.click();
-      },
+        const btn = document.querySelector('.icon-btn');
+        if (btn) btn.click();
+      }
     };
+  </script>
 
-    // 2) Load the Voiceflow web chat and register the extension
+  <!-- Voiceflow widget -->
+  <script type="text/javascript">
     (function(d, t) {
       var v = d.createElement(t), s = d.getElementsByTagName(t)[0];
       v.onload = function() {
@@ -84,13 +85,15 @@
       v.type = "text/javascript";
       s.parentNode.insertBefore(v, s);
     })(document, 'script');
+  </script>
 
-    // 3) Open chat when either button is clicked
-    function openChat() {
-      if (window.voiceflow?.chat?.open) window.voiceflow.chat.open();
-    }
-    document.getElementById('openChatbot').addEventListener('click', openChat);
-    document.getElementById('envelopeBtn').addEventListener('click', openChat);
+  <!-- Open chat on AI Chatbot button click -->
+  <script>
+    document.getElementById('openChatbot').addEventListener('click', () => {
+      if (window.voiceflow?.chat?.open) {
+        window.voiceflow.chat.open();
+      }
+    });
   </script>
 </body>
 </html>
