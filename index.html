@@ -64,7 +64,7 @@
       fill: white;
     }
 
-    /* Hide Voiceflow default launcher */
+    /* Hide the default Voiceflow launcher bubble */
     .vf-chat-launcher {
       display: none !important;
     }
@@ -96,6 +96,7 @@
     </svg>
   </button>
 
+  <!-- Voiceflow widget snippet (unchanged) -->
   <script type="text/javascript">
     (function(d, t) {
         var v = d.createElement(t), s = d.getElementsByTagName(t)[0];
@@ -106,19 +107,45 @@
             versionID: 'production',
             voice: { url: "https://runtime-api.voiceflow.com" }
           });
-
-          // Open chatbot when button clicked
-          document.getElementById('openChatbot').addEventListener('click', function() {
-            const launcher = document.querySelector('.vf-chat-launcher');
-            if (launcher) {
-              launcher.click(); // Simulate a click on the hidden launcher
-            }
-          });
         }
         v.src = "https://cdn.voiceflow.com/widget-next/bundle.mjs"; 
         v.type = "text/javascript"; 
         s.parentNode.insertBefore(v, s);
     })(document, 'script');
+  </script>
+
+  <!-- Script to trigger hidden widget when AI Chatbot is clicked -->
+  <script>
+    function waitFor(selector, timeout = 15000) {
+      return new Promise((resolve, reject) => {
+        const start = performance.now();
+        const id = setInterval(() => {
+          const el = document.querySelector(selector);
+          if (el) { clearInterval(id); resolve(el); }
+          else if (performance.now() - start > timeout) { clearInterval(id); reject(); }
+        }, 100);
+      });
+    }
+
+    (async () => {
+      try {
+        const launcher = await waitFor('.vf-chat-launcher');
+        launcher.style.display = 'none';
+        launcher.style.pointerEvents = 'none';
+
+        const openBtn = document.getElementById('openChatbot');
+        if (openBtn) {
+          openBtn.addEventListener('click', () => launcher.click());
+        }
+      } catch {
+        const openBtn = document.getElementById('openChatbot');
+        if (openBtn) {
+          openBtn.addEventListener('click', () => {
+            if (window.voiceflow?.chat?.open) window.voiceflow.chat.open();
+          });
+        }
+      }
+    })();
   </script>
 </body>
 </html>
