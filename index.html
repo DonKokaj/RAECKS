@@ -22,103 +22,50 @@
     <p>This is a simple HTML page for testing purposes.</p>
   </div>
 
-  <script>
-    // Helper: find element inside #voiceflow-chat shadow root
-    function findInVFShadow(selector) {
-      const host = document.querySelector('#voiceflow-chat');
-      if (!host || !host.shadowRoot) return null;
-      const search = (root) => {
-        const el = root.querySelector(selector);
-        if (el) return el;
-        for (const n of root.querySelectorAll('*')) {
-          if (n.shadowRoot) {
-            const found = search(n.shadowRoot);
-            if (found) return found;
-          }
-        }
-        return null;
-      };
-      return search(host.shadowRoot);
-    }
-
-    // Keep launcher hidden even if VF re-renders
-    function keepLauncherHidden() {
-      const host = document.querySelector('#voiceflow-chat');
-      if (host && host.shadowRoot) {
-        const hide = () => {
-          const launcher = findInVFShadow('.vfrc-launcher');
-          if (launcher) {
-            launcher.style.display = 'none';
-            launcher.style.visibility = 'hidden';
-            launcher.style.opacity = '0';
-            launcher.style.pointerEvents = 'none';
-          }
-        };
-        hide();
-        new MutationObserver(hide).observe(host.shadowRoot, { childList: true, subtree: true });
-      }
-    }
-
-    async function loadAndOpenVF() {
-      // Load bundle once
-      if (!window.__vfBundleLoading && !window.voiceflow) {
-        window.__vfBundleLoading = new Promise((resolve) => {
-          const v = document.createElement('script');
-          v.src = "https://cdn.voiceflow.com/widget-next/bundle.mjs";
-          v.type = "text/javascript";
-          v.onload = resolve;
-          document.head.appendChild(v);
-        });
-      }
-      if (window.__vfBundleLoading) {
-        await window.__vfBundleLoading;
-      }
-
-      // Initialize the chat (only once)
-      if (!window.__vfLoaded) {
+  <!-- Voiceflow widget snippet (unchanged) -->
+  <script type="text/javascript">
+    (function(d, t) {
+      var v = d.createElement(t), s = d.getElementsByTagName(t)[0];
+      v.onload = function() {
         window.voiceflow.chat.load({
           verify: { projectID: '68836e528962bd670e7bff9b' },
           url: 'https://general-runtime.voiceflow.com',
           versionID: 'production',
           voice: { url: 'https://runtime-api.voiceflow.com' }
         });
-        window.__vfLoaded = true;
-      }
 
-      // Wait until API is ready
-      await new Promise((res, rej) => {
-        const start = performance.now();
-        const id = setInterval(() => {
-          if (window.voiceflow?.chat?.open) {
-            clearInterval(id);
-            res();
-          } else if (performance.now() - start > 15000) {
-            clearInterval(id);
-            rej(new Error('Voiceflow API not ready'));
+        // After the API becomes available, hide the widget (launcher bubble)
+        const wait = setInterval(() => {
+          if (window.voiceflow?.chat?.hide) {
+            clearInterval(wait);
+            window.voiceflow.chat.hide();   // hides launcher bubble
           }
         }, 100);
-      });
+      };
+      v.src = "https://cdn.voiceflow.com/widget-next/bundle.mjs";
+      v.type = "text/javascript";
+      s.parentNode.insertBefore(v, s);
+    })(document, 'script');
+  </script>
 
-      // Hide launcher bubble via shadow DOM (so only the chat window is visible)
-      keepLauncherHidden();
-
-      // Open chat window
-      if (typeof window.voiceflow.chat.show === 'function') window.voiceflow.chat.show();
-      window.voiceflow.chat.open();
-
-      // When user closes/minimizes, keep the launcher hidden
-      window.addEventListener('message', (event) => {
-        try {
-          const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
-          if (data?.type === 'voiceflow:close') {
-            keepLauncherHidden();
-          }
-        } catch {}
-      }, { once: true });
-    }
-
+  <!-- Open the chat window from our button -->
+  <script>
     document.getElementById('openChatbot').addEventListener('click', () => {
-      loadAndOpenVF().catch(console.error);
+      if (window.voiceflow?.chat) {
+        // Re-show UI and open the chat window (so only the window is visible)
+        if (typeof window.voiceflow.chat.show === 'function') window.voiceflow.chat.show();
+        if (typeof window.voiceflow.chat.open === 'function') window.voiceflow.chat.open();
+      }
+    });
+
+    // Optional: when user closes the chat, hide the launcher again
+    window.addEventListener('message', (event) => {
+      try {
+        const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+        if (data?.type === 'voiceflow:close' && window.voiceflow?.chat?.hide) {
+          window.voiceflow.chat.hide();   // keep the bubble hidden after closing
+        }
+      } catch {}
     });
   </script>
 </body>
