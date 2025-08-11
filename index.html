@@ -25,6 +25,7 @@
       justify-content: center;
       box-shadow: 0 2px 5px rgba(0,0,0,0.2);
       border: none;
+      cursor: pointer;
     }
     .icon-btn svg {
       width: 22px;
@@ -43,8 +44,8 @@
     <p>This is a simple HTML page for testing purposes.</p>
   </div>
 
-  <!-- Floating envelope button (no click) -->
-  <button class="icon-btn" title="Message">
+  <!-- Floating envelope button -->
+  <button class="icon-btn" id="envelopeBtn" title="Message">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
       <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 
                2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 
@@ -53,18 +54,21 @@
     </svg>
   </button>
 
-  <!-- Voiceflow widget -->
-  const clickEnvelopeExtension = {
+  <!-- Extension + Widget load -->
+  <script>
+    // 1) Define your effect extension
+    const clickEnvelopeExtension = {
       name: 'click-envelope',
       type: 'effect',
-      match: ({ trace }) => trace.node.type === 'custom_action' && trace.node.name === 'ENVELOPE_CLICK',
+      // Custom Action name becomes the trace.type (see docs)
+      match: ({ trace }) => trace?.type === 'ENVELOPE_CLICK',
       effect: () => {
-        document.querySelector('.icon-btn')?.click();
+        // simulate clicking the envelope button
+        document.getElementById('envelopeBtn')?.click();
       },
     };
 
-
-  <script type="text/javascript">
+    // 2) Load the Voiceflow web chat and register the extension
     (function(d, t) {
       var v = d.createElement(t), s = d.getElementsByTagName(t)[0];
       v.onload = function() {
@@ -72,9 +76,7 @@
           verify: { projectID: '68836e528962bd670e7bff9b' },
           url: 'https://general-runtime.voiceflow.com',
           versionID: 'production',
-           assistant: {
-              extensions: [clickEnvelopeExtension],
-            },
+          assistant: { extensions: [clickEnvelopeExtension] },
           voice: { url: 'https://runtime-api.voiceflow.com' }
         });
       };
@@ -82,15 +84,13 @@
       v.type = "text/javascript";
       s.parentNode.insertBefore(v, s);
     })(document, 'script');
-  </script>
 
-  <!-- Open chat on AI Chatbot button click -->
-  <script>
-    document.getElementById('openChatbot').addEventListener('click', () => {
-      if (window.voiceflow?.chat?.open) {
-        window.voiceflow.chat.open();
-      }
-    });
+    // 3) Open chat when either button is clicked
+    function openChat() {
+      if (window.voiceflow?.chat?.open) window.voiceflow.chat.open();
+    }
+    document.getElementById('openChatbot').addEventListener('click', openChat);
+    document.getElementById('envelopeBtn').addEventListener('click', openChat);
   </script>
 </body>
 </html>
