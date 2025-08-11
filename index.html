@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Test Raecks</title>
   <style>
     body {
@@ -14,7 +14,6 @@
       flex-direction: column;
     }
 
-    /* Center AI Chatbot button at the top */
     .header {
       display: flex;
       justify-content: center;
@@ -32,43 +31,19 @@
       border-radius: 4px;
       cursor: pointer;
     }
+    .chatbot-btn:hover { background-color: #0056b3; }
 
-    .chatbot-btn:hover {
-      background-color: #0056b3;
-    }
-
-    /* Floating green icon button */
     .icon-btn {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 50px;
-      height: 50px;
-      background-color: #2f6458;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-      cursor: pointer;
-      border: none;
+      position: fixed; bottom: 20px; right: 20px;
+      width: 50px; height: 50px; border: none;
+      background: #2f6458; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,.2); cursor: pointer;
     }
+    .icon-btn:hover { background-color: #264f46; }
+    .icon-btn svg { width: 22px; height: 22px; fill: white; }
 
-    .icon-btn:hover {
-      background-color: #264f46;
-    }
-
-    .icon-btn svg {
-      width: 22px;
-      height: 22px;
-      fill: white;
-    }
-
-    /* Page content */
-    .content {
-      flex: 1;
-      padding: 20px;
-    }
+    .content { flex: 1; padding: 20px; }
   </style>
 </head>
 <body>
@@ -81,83 +56,124 @@
     <p>This is a simple HTML page for testing purposes.</p>
   </div>
 
-  <!-- Floating envelope button -->
+  <!-- Floating envelope button (optional visual) -->
   <button class="icon-btn" title="Message">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 
-               2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 
-               2-2zm0 2v.01L12 13 20 6.01V6H4zm0 
-               12h16V8l-8 7-8-7v10z"/>
+      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm0 2v.01L12 13 20 6.01V6H4zm0 12h16V8l-8 7-8-7v10z"/>
     </svg>
   </button>
 
   <!-- Voiceflow widget snippet (unchanged) -->
   <script type="text/javascript">
     (function(d, t) {
-        var v = d.createElement(t), s = d.getElementsByTagName(t)[0];
-        v.onload = function() {
-          window.voiceflow.chat.load({
-            verify: { projectID: '68836e528962bd670e7bff9b' },
-            url: 'https://general-runtime.voiceflow.com',
-            versionID: 'production',
-            voice: { url: "https://runtime-api.voiceflow.com" }
-          });
-        }
-        v.src = "https://cdn.voiceflow.com/widget-next/bundle.mjs"; 
-        v.type = "text/javascript"; 
-        s.parentNode.insertBefore(v, s);
+      var v = d.createElement(t), s = d.getElementsByTagName(t)[0];
+      v.onload = function() {
+        window.voiceflow.chat.load({
+          verify: { projectID: '68836e528962bd670e7bff9b' },
+          url: 'https://general-runtime.voiceflow.com',
+          versionID: 'production',
+          voice: { url: 'https://runtime-api.voiceflow.com' }
+        });
+      };
+      v.src = 'https://cdn.voiceflow.com/widget-next/bundle.mjs';
+      v.type = 'text/javascript';
+      s.parentNode.insertBefore(v, s);
     })(document, 'script');
   </script>
 
-  <!-- Script to find & hide widget in shadow DOM, and open it from button -->
+  <!-- Hide launcher inside shadow DOM + open on button -->
   <script>
-    function findInShadowRoots(selector) {
-      const search = (root) => {
-        if (!root) return null;
-        const el = root.querySelector(selector);
-        if (el) return el;
-        const elements = root.querySelectorAll('*');
-        for (const elem of elements) {
-          if (elem.shadowRoot) {
-            const found = search(elem.shadowRoot);
+    // Find within all shadow roots
+    function findInShadowRoots(hostSelector, innerSelector) {
+      const host = document.querySelector(hostSelector);
+      if (!host || !host.shadowRoot) return null;
+      const root = host.shadowRoot;
+      let el = root.querySelector(innerSelector);
+      if (el) return el;
+
+      // walk nested shadow DOM if any
+      const walk = (node) => {
+        if (!node) return null;
+        const tryEl = node.querySelector(innerSelector);
+        if (tryEl) return tryEl;
+        const all = node.querySelectorAll('*');
+        for (const n of all) {
+          if (n.shadowRoot) {
+            const found = walk(n.shadowRoot);
             if (found) return found;
           }
         }
         return null;
       };
-      return search(document);
+      return walk(root);
     }
 
-    function waitForInShadow(selector, timeout = 15000) {
-      return new Promise((resolve, reject) => {
-        const start = performance.now();
-        const id = setInterval(() => {
-          const el = findInShadowRoots(selector);
-          if (el) { clearInterval(id); resolve(el); }
-          else if (performance.now() - start > timeout) { clearInterval(id); reject(); }
-        }, 100);
-      });
-    }
-
-    (async () => {
+    // Optional: try XPath inside the shadow root (your path adjusted to be shadow-root-relative)
+    function findByXPathInShadow(hostSelector, xpath) {
+      const host = document.querySelector(hostSelector);
+      if (!host || !host.shadowRoot) return null;
       try {
-        const launcher = await waitForInShadow('.vf-chat-launcher');
+        return host.shadowRoot.evaluate(
+          xpath,
+          host.shadowRoot,
+          null,
+          XPathResult.FIRST_ORDERED_NODE_TYPE,
+          null
+        ).singleNodeValue;
+      } catch { return null; }
+    }
 
-        // Hide it
+    function hideLauncherAndWire() {
+      // 1) Try by class (recommended by VF): .vfrc-launcher
+      let launcher = findInShadowRoots('#voiceflow-chat', '.vfrc-launcher');
+
+      // 2) Fallback: try your XPath (relative to the shadow root)
+      if (!launcher) {
+        // Your absolute XPath won't pierce shadows; this variant searches inside the shadow root
+        launcher = findByXPathInShadow('#voiceflow-chat', "//button[contains(@class,'vfrc-launcher')]");
+      }
+
+      if (launcher) {
+        // hide it hard
         launcher.style.display = 'none';
         launcher.style.visibility = 'hidden';
         launcher.style.opacity = '0';
         launcher.style.pointerEvents = 'none';
 
-        // Open chatbot on button click
-        document.getElementById('openChatbot').addEventListener('click', () => launcher.click());
-      } catch {
-        // Fallback to API if launcher isn't found
-        document.getElementById('openChatbot').addEventListener('click', () => {
-          if (window.voiceflow?.chat?.open) window.voiceflow.chat.open();
-        });
+        // open on our button
+        const openBtn = document.getElementById('openChatbot');
+        if (openBtn) {
+          openBtn.onclick = () => {
+            // Use widget API if present; otherwise click the hidden launcher
+            if (window.voiceflow?.chat?.open) window.voiceflow.chat.open();
+            else launcher.click();
+          };
+        }
+        return true;
       }
-    })();
+      return false;
+    }
+
+    // Try repeatedly until the widget mounts
+    const maxWaitMs = 15000;
+    const start = performance.now();
+    const poll = setInterval(() => {
+      if (hideLauncherAndWire()) {
+        clearInterval(poll);
+
+        // Keep it hidden even if VF re-renders
+        const host = document.querySelector('#voiceflow-chat');
+        if (host && host.shadowRoot) {
+          new MutationObserver(() => hideLauncherAndWire())
+            .observe(host.shadowRoot, { childList: true, subtree: true });
+        }
+      } else if (performance.now() - start > maxWaitMs) {
+        clearInterval(poll);
+        // Wire button anyway via public API
+        const openBtn = document.getElementById('openChatbot');
+        if (openBtn) openBtn.onclick = () => window.voiceflow?.chat?.open?.();
+      }
+    }, 150);
   </script>
 </body>
 </html>
